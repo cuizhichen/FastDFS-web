@@ -1,0 +1,14 @@
+// 对文字溢出功能进行封装
+// ellipsis => 省略号
+ellipsis()
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+// 限制文字行数
+lineClamp(number)
+    word-break: break-all;
+    display: -webkit-box;
+    -webkit-line-clamp: number; /* 限制在一个块元素显示的文本的行数 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;

@@ -1,0 +1,160 @@
+* {
+    box-sizing: border-box;
+}
+
+body,
+form,
+table,
+tr,
+td {
+    margin: 0;
+    padding: 0;
+}
+
+body,
+form {
+    font-size: 13px
+}
+
+table {
+    border-collapse: collapse;
+}
+
+ul,
+li {
+    padding: 0;
+    margin: 0;
+    list-style: none
+}
+
+.row::after,
+.row::before {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.fl {
+    float: left;
+}
+
+.fr {
+    float: right;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+    color: #555555;
+}
+
+img {
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+button,
+input,
+textarea,
+div {
+    outline: none;
+}
+
+html {
+    font-size: 100px;
+    line-height: 1;
+}
+
+/* 滚动条一直在
+html {
+    overflow-y: scroll;
+} */
+
+body {
+    font-family: Microsoft YaHei, Arial, Helvetica, sans-serif;
+    color: #333;
+    font-size: 13px
+}
+
+/* 滚动条最佳优化方案 但左边会有白边
+html { 
+    margin-left: calc(100vw - 100%);
+ } */
+
+
+input::placeholder,
+textarea::placeholder {
+    color: #bbb;
+}
+
+input,
+textarea {
+    border: 1px solid #dddddd;
+}
+
+
+button {
+    cursor: pointer;
+}
+
+.strong {
+    color: #333;
+    font-weight: 800;
+}
+
+.gray {
+    color: #999999;
+}
+
+fieldset {
+    border: none
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.border {
+    border: 1px solid #e3e3e3;
+}
+
+.border-left {
+    border-left: 1px solid #e3e3e3;
+}
+
+.border-top {
+    border-top: 1px solid #e3e3e3;
+}
+
+.border-right {
+    border-right: 1px solid #e3e3e3;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #e3e3e3;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+}
+
+
+/* .sticky {
+    min-height: calc(100vh - 380px);
+} */
