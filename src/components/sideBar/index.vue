@@ -78,7 +78,7 @@ export default {
   },
 
   methods: {
-    ...mapMutations("home", ["changeTitle"]),
+    ...mapMutations("home", ["changeTitle", "changeDeleteList"]),
 
     catClick(it) {
       this.$set(this.params, "fileName", "");
@@ -88,8 +88,9 @@ export default {
         path: "/",
         query: { category: it.query }
       });
+
       this.changeTitle({ name: it.name, enName: it.enName });
-      this.$emit("emptySearch");
+      this.changeDeleteList("[]");
     }
   }
 };

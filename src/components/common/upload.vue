@@ -28,7 +28,6 @@
 <script>
 import { date } from "@/lib/help";
 import api from "@/lib/api";
-import axios from "axios";
 
 export default {
   props: {
@@ -44,16 +43,16 @@ export default {
 
   data() {
     return {
-      dialogText: "",
-      dialogVisible: false,
-      isConfirm: true
+      dialogText: "", // dialog的内容根据情况改变
+      dialogVisible: false, // dialog是否出现
+      isConfirm: true // 当确定上传时改变为false，用于异步处理onChange方法
     };
   },
 
   methods: {
     // 文件即将开始上传时
     beforeUpload(file) {
-      const reg = /(?<=\.)\w+$/;
+      // 初始化一个文件，status用于控制进度条
       let newFile = {};
       newFile.fileName = file.name;
       newFile.fileSize = (file.size / 1024).toFixed(1) + "kb";
@@ -65,16 +64,17 @@ export default {
       this.$emit("update:loading", true);
     },
 
+    // 文件状态改变时的钩子
     async onChange(file) {
       if (!this.isConfirm) {
         this.isConfirm = true;
         return;
       }
 
-      let a = await api("get", "findFile", {
+      let res = await api("get", "findFile", {
         params: { fileName: file.name }
       });
-      if (!a) {
+      if (!res) {
         this.$confirm(`${file.name}文件已存在，是否更新其版本`).then(r => {
           if (r === "confirm") {
             this.$refs.upload.submit();
@@ -94,10 +94,16 @@ export default {
       this.$emit("update:list", list);
     },
 
+    // 调用方法上传文件
+    submitUpload() {
+      this.$refs.upload.submit();
+    },
+
+    // 上传成功时
     async onSuccess(r, file) {
       this.$emit("update:loading", false);
 
-      if (r.msg === 2) {
+      if (r === 2) {
         this.dialogVisible = true;
         this.dialogText = `<div class='dialog-title'>文件上传失败</div>
          <div class='dialog-desc'>请检查你的文件大小（不超过500MB）</div>`;
@@ -119,15 +125,12 @@ export default {
       this.$emit("getList");
     },
 
+    // 上传失败时
     onError(r) {
       this.$emit("update:loading", false);
       this.dialogVisible = true;
       this.dialogText = "文件上传失败，请重新上传";
       this.$emit("getList");
-    },
-
-    submitUpload() {
-      this.$refs.upload.submit();
     }
   }
 };

@@ -1,9 +1,9 @@
 <template>
   <div class="home-page">
-    <side-bar :params="params" :pendingLoad.sync="pendingLoad" @emptySearch="emptySearch"/>
+    <side-bar :params="params"/>
     <div
       class="home-right"
-      v-loading="pendingLoad"
+      v-loading="pending"
       element-loading-text="拼命加载中"
       element-loading-background="rgba(255, 255, 255, 0.6)"
     >
@@ -19,14 +19,14 @@
             :disabled="loading"
             plain
             @click="batchRemove"
-          >{{batchDelete?'删除':'批量删除'}}</el-button>
+          >{{batch?'删除':'批量删除'}}</el-button>
 
           <el-button
             class="cancel-delete"
-            v-if="batchDelete === true"
+            v-if="batch === true"
             :disabled="loading"
             plain
-            @click="cancelDelete"
+            @click="$refs.table.cancelDelete()"
           >取消删除</el-button>
         </div>
       </div>
@@ -37,10 +37,9 @@
           :list.sync="list"
           :loading.sync="loading"
           :params.sync="params"
-          :batchDelete="batchDelete"
+          :batch.sync="batch"
           :total="total"
           @getList="getList"
-          @updateDeleteList="updateDeleteList"
         ></home-table>
       </div>
     </div>
@@ -53,7 +52,7 @@ import SideBar from "@/components/sideBar";
 import HomeSearch from "./components/search";
 import HomeTable from "./components/table";
 import api from "@/lib/api";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 
 export default {
   components: {
@@ -66,10 +65,10 @@ export default {
   data() {
     return {
       loading: false, // 上传中
-      pendingLoad: false, // 请求pending中
-      batchDelete: false,
-      deleteList: [],
+      batch: false, // 是否批量操作
       list: [],
+
+      // 获取列表默认的传参
       params: {
         current: 1,
         size: 10,
@@ -79,20 +78,17 @@ export default {
         fileName: ""
       },
 
-      searchParams: {
-        current: 1,
-        size: 2,
-        fileName: ""
-      },
-
       total: null,
-      oldCategory: null // 当前的分类，用于url传参改变时
+
+      // 上次获取参数时的传参，用于判断再次发送请求时是否回到第一页
+      oldCategory: null
     };
   },
 
   computed: {
     ...mapState({
-      title: state => state.home.title
+      title: state => state.home.title,
+      pending: state => state.common.pending
     })
   },
 
@@ -112,18 +108,23 @@ export default {
   },
 
   methods: {
+    ...mapMutations("common", ["changePending"]),
+
     async getList() {
-      this.pendingLoad = true;
+      this.changePending(true);
       let { total, fileList } = await api("get", "listPage", {
         params: this.params
       });
-      console.log(1);
-      this.pendingLoad = false;
+
+      // 每次获取完数据，初始化一些数据
+      this.changePending(false);
       this.list = fileList;
       this.total = total;
+      this.batch = false;
       this.oldCategory = this.params.category;
     },
 
+    // 搜索时，设置文件名为传参，并且分类为全部
     searchFile(fileName) {
       this.params.fileName = fileName;
       this.params.category = "all";
@@ -131,37 +132,13 @@ export default {
     },
 
     // 选择批量删除，选择后批量删除变为删除按钮，此处要做判断
-    batchRemove() {
-      if (this.batchDelete) {
-        const data = this.$confirm(`确定移除 ${it.fileName}？`);
-        if (data === "confirm") {
-          this.pendingLoad = true;
-          api("post", "delete", {
-            fileNameList: this.deleteList
-          }).then(r => {
-            this.getList();
-            this.pendingLoad = false;
-            this.batchDelete = false;
-          });
-        } else return;
+    async batchRemove() {
+      if (this.batch) {
+        const data = await this.$confirm(`确定移除这些文件么？`);
+        if (data === "confirm") this.$refs.table.batchRemove();
       } else {
-        this.batchDelete = true;
+        this.batch = true;
       }
-    },
-
-    // 更新要删除的文件列表
-    updateDeleteList(e) {
-      this.deleteList = e;
-    },
-
-    cancelDelete() {
-      this.batchDelete = false;
-      this.deleteList = [];
-      this.$refs.table.emptyList();
-    },
-
-    emptySearch() {
-      this.$refs.search.emptySearch();
     }
   }
 };
