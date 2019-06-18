@@ -2,6 +2,7 @@
   <div class="side-bar-comp">
     <div class="logo-wrapper">
       <img src="../../assets/img/logo.png" alt="FastDSF">
+      <div class="version">V 2.0.0</div>
     </div>
     <div class="cat-group">
       <div class="cat-item" v-for="it in list" :key="it.query">
@@ -40,7 +41,6 @@ export default {
           name: "全部文件",
           query: "all",
           enName: "All File",
-
           children: [
             {
               name: "图片",
@@ -114,6 +114,12 @@ export default {
     width: 130px;
     padding-top: 40px;
     margin-bottom: 80px;
+
+    .version {
+      margin-top: 12px;
+      color: $subMc;
+      font-size: 14px;
+    }
   }
 
   .cat-group {

@@ -1,16 +1,32 @@
 <template>
   <div class="table-item" :class="{'batch':batch}">
-    <div class="name" :title="it.fileName">
-      <div class="inner-text" @click="itemClick(it)">{{it.fileName}}</div>
+    <div class="name" :title="it.fileName" @click="itemClick(it)">
+      <div class="inner-text">{{it.fileName}}</div>
     </div>
-    <div class="username" @click="itemClick(it)">{{it.operator}}</div>
-    <div class="uploadTime" @click="itemClick(it)">{{date(it.uploadDate)}}</div>
-    <div class="fileSize" @click="itemClick(it)">{{it.fileSize}}</div>
+    <div class="username">{{it.operator}}</div>
+    <div class="uploadTime">{{date(it.uploadDate)}}</div>
+    <div class="fileSize">{{it.fileSize}}</div>
     <div class="operation" v-if="!it.status && it.status !== 0">
-      <el-button size="mini" :disabled="loading" plain @click.stop="history(it)">历史</el-button>
-      <el-button size="mini" :disabled="loading" plain @click.stop="down(it)">下载</el-button>
-      <el-button size="mini" :disabled="loading" plain @click.stop="preview(it)">预览</el-button>
-      <el-button size="mini" :disabled="loading" plain type="danger" @click.stop="remove(it)">删除</el-button>
+      <i class="el-icon-download"></i>
+      <el-dropdown>
+        <span class="el-dropdown-link">
+          <i class="el-icon-more"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item @click.native.stop="history(it)">
+            <i class="el-icon-files"></i>
+            历史
+          </el-dropdown-item>
+          <el-dropdown-item @click.native.stop="preview(it)">
+            <i class="el-icon-view"></i>
+            预览
+          </el-dropdown-item>
+          <el-dropdown-item @click.native.stop="remove(it)">
+            <i class="el-icon-delete"></i>
+            删除
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </div>
 
     <div class="percent" v-else-if="typeof it.status === 'number'">
@@ -24,9 +40,12 @@
 <script>
 import api from "@/lib/api";
 import { date } from "@/lib/help";
-import { mapState, mapMutations } from "vuex";
+import { mapMutations } from "vuex";
+import homeMixins from "@/mixins/home";
 
 export default {
+  mixins: [homeMixins],
+
   props: {
     it: {
       type: Object,
@@ -49,12 +68,6 @@ export default {
     }
   },
 
-  computed: {
-    ...mapState({
-      pending: state => state.common.pending
-    })
-  },
-
   methods: {
     date,
     ...mapMutations("common", ["changePending"]),
@@ -63,11 +76,7 @@ export default {
     // 当批量操作时，则 添加/删除
     itemClick(it) {
       if (!this.batch) {
-        window.open(
-          `http://192.100.2.39:8012/onlinePreview?url=http://192.100.2.8:80/${
-            it.groupName
-          }/${encodeURIComponent(it.remoteFileName)}`
-        );
+        this.preview(it);
         return;
       }
 
@@ -83,22 +92,6 @@ export default {
 
       this.$emit("update:historyList", data);
       this.changePending(false);
-    },
-
-    // 文件下载
-    down(it) {
-      window.location.href = `http://192.100.2.39:12580/downFile?groupName=${
-        it.groupName
-      }&remoteFileName=${it.remoteFileName}`;
-    },
-
-    // 文件预览
-    preview(it) {
-      window.open(
-        `http://192.100.2.39:8012/onlinePreview?url=http://192.100.2.8:80/${
-          it.groupName
-        }/${encodeURIComponent(it.remoteFileName)}`
-      );
     },
 
     // 文件删除
@@ -132,7 +125,6 @@ export default {
   display: flex;
   align-items: center;
   transition: all 0.3s;
-  line-height: 28px;
 
   &.batch {
     margin-left: 40px;
@@ -143,12 +135,13 @@ export default {
     color: #666;
 
     &:nth-child(1) {
-      transition: all 0.3s;
-      flex-basis: 45.833333333333336%;
-      padding-right: 16px;
-      lineClamp(1);
-      cursor: pointer;
       display: flex;
+      flex-basis: 50%;
+      transition: all 0.3s;
+      padding: 22px 0;
+      padding-right: 16px;
+      cursor: pointer;
+      lineClamp(1);
 
       .inner-text {
         flex: 1;
@@ -156,12 +149,26 @@ export default {
     }
 
     &:nth-child(3) {
-      flex-basis: 12.5%;
+      flex-basis: 16.666666666666668%;
     }
 
     &:nth-child(5) {
-      flex-basis: 25%;
-      text-align: right;
+      text-align: center;
+      flex-basis: 16.666666666666668%;
+
+      i {
+        font-size: 20px;
+        margin-right: 20px;
+        cursor: pointer;
+
+        &:hover {
+          color: $mc;
+        }
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
     }
   }
 }

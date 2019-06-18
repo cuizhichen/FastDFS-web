@@ -3,15 +3,15 @@
     <el-upload
       class="upload-demo"
       ref="upload"
-      action="http://192.100.2.39:12580/upload"
-      :auto-upload="false"
-      :on-change="onChange"
+      :action="`${ip}/upload`"
       :disabled="loading"
       :show-file-list="false"
       :before-upload="beforeUpload"
       :on-progress="onProgress"
       :on-success="onSuccess"
       :on-error="onError"
+      drag
+      multiple
     >
       <el-button size="small" :disabled="loading" type="primary">点击上传</el-button>
     </el-upload>
@@ -28,6 +28,8 @@
 <script>
 import { date } from "@/lib/help";
 import api from "@/lib/api";
+import { log } from "util";
+import { mapState } from "vuex";
 
 export default {
   props: {
@@ -45,8 +47,15 @@ export default {
     return {
       dialogText: "", // dialog的内容根据情况改变
       dialogVisible: false, // dialog是否出现
-      isConfirm: true // 当确定上传时改变为false，用于异步处理onChange方法
+      isConfirm: false, // 当确定上传时改变为false，用于异步处理onChange方法
+      authorList: []
     };
+  },
+
+  computed: {
+    ...mapState({
+      ip: state => state.common.ip
+    })
   },
 
   methods: {
@@ -56,51 +65,25 @@ export default {
       let newFile = {};
       newFile.fileName = file.name;
       newFile.fileSize = (file.size / 1024).toFixed(1) + "kb";
-      newFile.operator = "方程";
+      newFile.operator = "我";
       newFile.uploadDate = file.uid;
       newFile.status = 0;
-      let list = [...[newFile], ...this.list];
-      this.$emit("update:list", list);
+      this.list.unshift(newFile);
+
       this.$emit("update:loading", true);
-    },
-
-    // 文件状态改变时的钩子
-    async onChange(file) {
-      if (!this.isConfirm) {
-        this.isConfirm = true;
-        return;
-      }
-
-      let res = await api("get", "findFile", {
-        params: { fileName: file.name }
-      });
-      if (!res) {
-        this.$confirm(`${file.name}文件已存在，是否更新其版本`).then(r => {
-          if (r === "confirm") {
-            this.$refs.upload.submit();
-            this.isConfirm = false;
-          }
-        });
-      } else {
-        this.$refs.upload.submit();
-        this.isConfirm = false;
-      }
+      return true;
     },
 
     // 文件上传时，获取当前上传的文件列表
     onProgress(event, file, fileList) {
-      let list = [...this.list];
-      list[0].status = parseFloat(event.percent.toFixed(0));
-      this.$emit("update:list", list);
-    },
-
-    // 调用方法上传文件
-    submitUpload() {
-      this.$refs.upload.submit();
+      fileList.forEach((file, index) => {
+        this.list[index].status = parseFloat(file.percentage.toFixed(0));
+      });
     },
 
     // 上传成功时
-    async onSuccess(r, file) {
+    onSuccess(r, file, fileList) {
+      console.log(fileList);
       this.$emit("update:loading", false);
 
       if (r === 2) {
@@ -130,6 +113,15 @@ export default {
       this.$emit("update:loading", false);
       this.dialogVisible = true;
       this.dialogText = "文件上传失败，请重新上传";
+
+      this.$emit("getList");
+    },
+
+    onExceed(files, fileList) {
+      this.fileList = [];
+      this.dialogVisible = true;
+      this.dialogText = `<div class='dialog-title'>文件上传失败</div>
+         <div class='dialog-desc'>单次上传文件个数不可多余10个</div>`;
       this.$emit("getList");
     }
   }
@@ -139,6 +131,13 @@ export default {
 <style lang="stylus">
 .upload-comp {
   .upload-demo {
+    .el-upload-dragger {
+      width: auto;
+      height: auto;
+      border: none;
+      background: transparent;
+    }
+
     button {
       padding: 10px 36px;
       font-size: 13px;

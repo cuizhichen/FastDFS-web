@@ -108,7 +108,7 @@ export default {
       titleList: [
         {
           name: "文件名称",
-          frid: 11,
+          frid: 12,
           order: "file_name"
         },
         {
@@ -118,7 +118,7 @@ export default {
         },
         {
           name: "上传时间",
-          frid: 3,
+          frid: 4,
           order: "upload_date"
         },
         {
@@ -128,7 +128,7 @@ export default {
         },
         {
           name: "操作",
-          frid: 6
+          frid: 4
         }
       ],
       historyList: [],
@@ -213,7 +213,7 @@ export default {
   .table-title {
     background: #f2f2f2;
     line-height: 48px;
-    padding: 0 14px;
+    padding: 0 20px;
 
     .title-item {
       font-size: 15px;
@@ -240,8 +240,6 @@ export default {
 
       &:last-child {
         text-align: center;
-        position: relative;
-        left: 28px;
       }
     }
   }
@@ -251,7 +249,11 @@ export default {
 
     .body-item {
       position: relative;
-      padding: 14px 14px;
+      padding: 0px 20px;
+
+      &:nth-child(even) {
+        background: #f9f9f9;
+      }
 
       &.select {
         background: $tsubMc;

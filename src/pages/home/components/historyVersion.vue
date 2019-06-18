@@ -47,8 +47,11 @@
 <script>
 import { date } from "@/lib/help";
 import api from "@/lib/api";
+import homeMixins from "@/mixins/home";
 
 export default {
+  mixins: [homeMixins],
+
   props: {
     list: {
       type: Array,
@@ -113,22 +116,6 @@ export default {
       });
       this.$emit("update:list", []);
       this.$emit("getList");
-    },
-
-    // 文件预览
-    preview(it) {
-      window.open(
-        `http://192.100.2.39:8012/onlinePreview?url=http://192.100.2.8:80/${
-          it.groupName
-        }/${encodeURIComponent(it.remoteFileName)}`
-      );
-    },
-
-    // 文件下载
-    down(it) {
-      window.location.href = `http://192.100.2.39:12580/downFile?groupName=${
-        it.groupName
-      }&remoteFileName=${it.remoteFileName}`;
     }
   },
 
