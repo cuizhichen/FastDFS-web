@@ -1,7 +1,7 @@
 <template>
   <div class="home-page">
     <side-bar :params="params"/>
-    <div
+    <div 
       class="home-right"
       v-loading="pending"
       element-loading-text="拼命加载中"
